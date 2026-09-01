@@ -117,7 +117,7 @@ def _extract_model_name(run_specs_df: pd.DataFrame, models_root: str) -> str:
         parts = {kv.split("=", 1)[0]: kv.split("=", 1)[1]
                  for kv in name.split(",") if "=" in kv}
         model_id = parts.get("model", name)
-
+    model_id = "Qwen/Qwen3-4B"
     # HELM replaces "/" with "_" in paths; try to restore it.
     # E.g. "meta-llama_Llama-3-2-3B" → probably won't match, but the raw
     # adapter_spec.model usually keeps the slash.

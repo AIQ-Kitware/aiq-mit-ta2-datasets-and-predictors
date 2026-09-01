@@ -1,0 +1,151 @@
+# CircuitOverlap as a kwdagger pipeline.
+#
+# Sibling of qwen_arithmetic_fixed.yaml, which is untouched and still runs.
+# Same technique, same predictor, same artifact -- what changes is that MAGNET
+# drives a kwdagger DAG from outside instead of resolving the work inside a
+# symbol, so the node's command is the unit that can be containerized, leased
+# and scheduled on tmux or Slurm.
+#
+# ONE card for the technique. Everything that varies is an algo_param with a
+# default, addressable from the matrix below or overridden per invocation with
+# `--params`. There is deliberately no second card for a different grid.
+#
+# No code changed to make this work. `run_predictor_card.py` already writes
+# {"result": {"auc_by_model": ..., "summary": {...}}}, and `summary` is flat and
+# numeric, so pointing the generic loader's metrics path at `result.summary`
+# lifts n_models / mean_auc / min_auc into metrics.circuit_overlap.* with no
+# custom load_result and no change to the predictor.
+
+name: mit_circuit_overlap
+
+title: "CircuitOverlap Predictor — Qwen3 / arithmetic_fixed (kwdagger)"
+
+description: |
+  The circuit overlap predictor should achieve above-chance AUC when predicting
+  per-instance accuracy on the arithmetic_fixed cross_lingual evaluation split
+  for Qwen3 base models.
+
+  The predictor is fit on the HELM TRAIN split (english + symbolic examples) and
+  evaluated on the HELM TEST split (spanish + italian examples). AUC is computed
+  against ground-truth exact-match labels.
+
+  One model per cell, so `mean_auc` over `auc_by_model` is that model's AUC.
+  Sweeping models means adding run_spec_pattern values to the matrix, not
+  writing another card.
+
+version: 1.0
+
+organizations:
+  - MIT
+
+submitter:
+  name: MIT TA2 Team
+  email: jda@mit.edu
+
+tags:
+  - qwen
+  - predictor
+  - circuit_overlap
+  - arithmetic
+  - cross_lingual
+  - instance_prediction
+  - kwdagger
+
+links:
+  - title: "darpa3 (predictor source)"
+    url: "https://github.com/mit-ll/darpa3"
+    type: "software"
+  - title: "arithmetic_fixed dataset"
+    url: "https://github.com/mit-ll/aiq-mit-ta2"
+    type: "dataset"
+
+claim:
+  python: |
+    m = metrics.circuit_overlap
+    threshold = 0.65
+
+    # A cell that produced no usable AUC did not test the claim. MAGNET maps
+    # AssertionError -> FALSIFIED and anything else -> INCONCLUSIVE; scoring
+    # "the predictor could not run" as "the claim is false" would report a
+    # team's finding as refuted by a run that never tested it.
+    if m.n_models < 1:
+        raise RuntimeError(
+            'no models matched run_spec_pattern -- check helm_runs_path'
+        )
+
+    print(f"[circuit_overlap] mean_auc={m.mean_auc:.4f} over {m.n_models} model(s)")
+    assert m.mean_auc >= threshold, (
+        f"CircuitOverlap AUC ({m.mean_auc:.3f}) is below threshold "
+        f"({threshold:.2f}) on arithmetic_fixed/cross_lingual"
+    )
+
+# Tie the snapshot to the matrix this invocation requested. Results in the
+# shared DAG root from another grid are not contamination, but a card that
+# reports a verdict should say which cells it read.
+evidence:
+  scope: requested
+
+symbols:
+  metrics.circuit_overlap.mean_auc:
+    metadata:
+      display_name: "CircuitOverlap AUC"
+      display: True
+      define_metric:
+        objective: maximize
+        aggregation_strategy:
+          type: 'mean'
+
+  metrics.circuit_overlap.n_models:
+    metadata:
+      display_name: "Models Scored"
+      display: True
+
+kwdagger:
+  result_node: circuit_overlap
+
+  pipeline:
+    nodes:
+      circuit_overlap:
+        # Containerized execution is opt-in per node class, and a card that
+        # declares its DAG as data gets kwdagger's YamlProcessNode -- a sibling
+        # of MAGNET's ContainerProcessNode, not a descendant. Without this key
+        # `--container_image` is accepted, stored and never read: a green run
+        # that containerized nothing. Inert until an image is named, so the
+        # same card still runs on the host.
+        class: magnet.containers.ContainerYamlProcessNode
+        # A wrapper, not the runner directly: a cmd_queue tmux worker inherits
+        # NOTHING, so a bare `python` there is whatever the login shell exposes
+        # -- missing torch, or a different interpreter that scores something
+        # else. The wrapper resolves the interpreter from its own location and
+        # fails fast. kwdagger formats the declared params onto the CLI as
+        # --key=value, which is the interface run_predictor_card.py exposes.
+        # Relative on purpose: the card carries no evaluator's machine, so
+        # it resolves against the job's cwd -- under Slurm that is sbatch's
+        # --chdir default, i.e. wherever magnet was invoked from.
+        # scripts/run_mit_circuit_overlap.sh cd's to the submodule first,
+        # and the wrapper re-anchors from its own location, so this is the
+        # only cwd-sensitive step in the node.
+        executable: "bash magnet_adapter/run_predictor_env.sh"
+        algo_params:
+          # Relative by default so the card carries no evaluator's machine.
+          # The runner passes absolute values via --params. See SMELL-MIT-03.
+          helm_runs_path: "../aiq-mit-ta2/benchmark_output"
+          run_spec_pattern: "arithmetic_fixed*Qwen*"
+          k_fraction: 0.01
+          batch_size: 4
+        out_paths:
+          results_fpath: results.json
+        primary_out_key: results_fpath
+        result:
+          # The predictor's flat numeric block. Lifted to metrics.circuit_overlap.*
+          metrics: 'result.summary'
+          # run_predictor_card.py writes no ProcessContext block, so there is
+          # nothing to parse for resolved_params.
+          info: null
+
+  # Single-valued axes are defaults you override, not the card's identity.
+  # e.g. --params "matrix: {circuit_overlap.k_fraction: [0.005, 0.01, 0.05]}"
+  matrix:
+    circuit_overlap.run_spec_pattern: "arithmetic_fixed*Qwen*"
+    circuit_overlap.k_fraction: 0.01
+    circuit_overlap.batch_size: 4
