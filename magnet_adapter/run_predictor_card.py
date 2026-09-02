@@ -57,7 +57,7 @@ import magnet.theory as theory  # noqa: E402
 
 @theory.assumes(
     'Hygiene.Inference.threshold_exceeds_sampling_error::hn_sufficient',
-    note='HIGH, and the load-bearing gap. This function returns a point AUC '
+    note='the load-bearing gap. This function returns a point AUC '
          'and nothing else. No confidence interval, no permutation null, no '
          'count of positives and negatives -- and the sampling error of an AUC '
          'is governed by the smaller of those two counts, not by the item '
@@ -70,7 +70,7 @@ import magnet.theory as theory  # noqa: E402
 )
 @theory.assumes(
     'Hygiene.Measurement.measured_score_tracks_construct::hstable',
-    note='MEDIUM. The score being ranked is a gradient-times-activation '
+    note='the score being ranked is a gradient-times-activation '
          'attribution summed over the reference top-K. Both `dtype` '
          '(bfloat16 on GPU, float32 on CPU) and `batch_size` are card matrix '
          'parameters, and both change those attributions numerically. Nothing '
@@ -91,29 +91,20 @@ def _compute_auc(predicted_mean, actual_mean) -> float:
 
 @theory.tests(
     'Hygiene.Inference.threshold_exceeds_sampling_error',
-    note='this is where "AUC >= 0.65" is either discharged or left standing; '
-         'the three premises are the three questions to ask the card, and all '
-         'three are answerable from the card itself',
+    note='this is where "AUC >= 0.65" is either discharged or left standing',
 )
 @theory.approximates(
     'Hygiene.Measurement.measured_score_tracks_construct',
-    note='the construct is "this model will get this arithmetic item right"; '
-         'what is measured is the rank correlation between a circuit-overlap '
-         'score and an exact-match label on a finite cross-lingual split',
+    note='construct: gets the item right; measured: a rank correlation on a split',
 )
 @theory.satisfies(
     'Hygiene.Inference.threshold_exceeds_sampling_error::hprespecified',
-    note='0.65 is fixed before any result is seen -- but it is HARD-CODED in '
-         'the card claim block rather than declared as a card symbol, so it is '
-         'neither overridable from the command line nor visible on the '
-         'dashboard next to the value it gates. Prespecified, yes; auditable '
-         'without reading the claim source, no. Promoting it to a symbol is a '
-         'one-line change and would make this `satisfies` checkable rather '
-         'than asserted.',
+    note='0.65 is fixed before results are seen, but hard-coded in the claim '
+         'block rather than declared as an overridable card symbol',
 )
 @theory.assumes(
     'Hygiene.Inference.threshold_exceeds_sampling_error::hmultiple',
-    note='MEDIUM. `mean_auc` is a mean over whatever models matched '
+    note='`mean_auc` is a mean over whatever models matched '
          '`run_spec_pattern`, and the card matrix is explicitly designed to '
          'sweep `k_fraction` and model patterns. Every sweep point is a '
          'comparison against the same 0.65, and no correction is applied. With '
@@ -122,14 +113,11 @@ def _compute_auc(predicted_mean, actual_mean) -> float:
 )
 @theory.satisfies(
     'Hygiene.Measurement.measured_score_tracks_construct::hscorer',
-    note='the label is HELM exact match on arithmetic answers, where the '
-         'construct IS string equality with the correct number -- one of the '
-         'few places on this program where the automatic scorer and the '
-         'construct genuinely coincide, rather than the scorer proxying it',
+    note='HELM exact match, where the construct IS string equality',
 )
 @theory.assumes(
     'Hygiene.Measurement.measured_score_tracks_construct::hcontam',
-    note='MEDIUM. Nothing establishes that the arithmetic_fixed cross_lingual '
+    note='nothing establishes that the arithmetic_fixed cross_lingual '
          'items are outside Qwen3 pretraining. The direction is not obvious '
          'either: contamination would raise accuracy on the contaminated '
          'items, and the card predicts per-item accuracy, so it could either '

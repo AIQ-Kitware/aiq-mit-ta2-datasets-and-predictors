@@ -42,12 +42,7 @@ import magnet.theory as theory
 
 @theory.satisfies(
     'AIQ.Conjectures.Circuits.jaccard_invariant_of_shared_permutation::hS',
-    note='this IS the selector, and it is a top-k-by-absolute-value rule over '
-         'the flattened attribution: it reads scores and never unit names or '
-         'positions, so relabelling the units relabels the circuit and nothing '
-         'else. That is exactly `Equivariant` in the Lean, and it is what '
-         'makes the within-model comparison sound rather than merely '
-         'unexamined.',
+    note='top-k-by-magnitude reads scores, never unit names: `Equivariant`',
 )
 def topk_indices_abs(vec: np.ndarray, k: int) -> np.ndarray:
     """Flat indices of the top-k entries by absolute value."""
@@ -69,14 +64,7 @@ def cosine(a: np.ndarray, b: np.ndarray) -> float:
 
 @theory.motivates(
     'AIQ.Conjectures.Circuits.crossModel_jaccard_not_functional',
-    note='the quantity the conjecture is about. It is not a defect in the '
-         'current card -- it is a constraint on where the card can be taken. '
-         'BAA Phase 2 asks whether similar architectures yield similar natural '
-         'classes, which requires comparing circuits ACROSS models; if the '
-         'conjecture holds, this overlap is not a function of the functions '
-         'compared and the Phase-2 extension needs an alignment step designed '
-         'in from the start. A negative result delivered before Phase 2 is a '
-         'design input; found during it, it is a rewrite.',
+    note='if it holds, a cross-model extension of this overlap needs alignment',
 )
 def jaccard_sets(a: np.ndarray, b: np.ndarray) -> float:
     """Jaccard index between two sets of flat indices."""
@@ -90,12 +78,7 @@ def jaccard_sets(a: np.ndarray, b: np.ndarray) -> float:
 
 @theory.motivates(
     'AIQ.Conjectures.Circuits.jaccard_invariant_of_shared_permutation',
-    note='the deployed case, and the sound one. The reference is a '
-         'correctness-weighted mean of attributions from the SAME model, so a '
-         'relabelling of that model\'s units permutes the reference and every '
-         'item vector together and the overlap is unchanged. Recorded as '
-         'grounded rather than left blank so the boundary is visible: it is '
-         'the cross-model extension that is in question, not this card.',
+    note='the reference is same-model, so a relabelling permutes both sides',
 )
 def build_reference(
     attr: np.ndarray,
@@ -125,10 +108,7 @@ def build_reference(
 
 @theory.motivates(
     'AIQ.Conjectures.Circuits.alignedJaccard_is_functional',
-    note='the repair, at the cost of a matching problem over unit labellings. '
-         'Whether that matching is tractable at transformer width is a '
-         'follow-on empirical question and this function is where it would '
-         'land.',
+    note='the repair, at the cost of a matching problem over unit labellings',
 )
 @theory.ignores(
     'AIQ.Conjectures.Circuits.alignedJaccard_is_functional::hab',
