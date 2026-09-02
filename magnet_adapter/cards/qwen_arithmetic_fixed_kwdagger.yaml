@@ -99,6 +99,17 @@ theory:
     - ../run_predictor_card.py
 
   links:
+    - relation: tests
+      ref: AIQ.Teams.CircuitOverlap.jaccard_topK_relabel
+      note: >
+        Relabelling hidden units leaves the overlap unchanged, so the within-model
+        comparison this card performs measures the model rather than the order its
+        units are stored in. Proved.
+    - relation: motivates
+      ref: AIQ.Teams.CircuitOverlap.jaccard_not_invariant_of_one_sided_image
+      note: >
+        And where that stops: permuting one side alone takes the overlap from 1
+        to 0, which is the cross-model situation. Alignment is required there.
     - relation: approximates
       ref: AIQ.Teams.CircuitOverlap.jaccard_le_one
       note: >
