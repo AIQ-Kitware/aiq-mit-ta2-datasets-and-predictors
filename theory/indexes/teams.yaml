@@ -13,7 +13,7 @@ entries:
 - id: AIQ.Teams.CircuitOverlap.jaccard_le_one
   kind: theorem
   declaration: AIQ.Teams.CircuitOverlap.jaccard_le_one
-  source_path: theory/lean/CircuitOverlap.lean
+  source_path: theory/lean/CircuitOverlap/Basic.lean
   statement: 'Circuit overlap is bounded by one, for any two circuits including empty ones.
     PROVED.
 
@@ -21,7 +21,7 @@ entries:
 - id: AIQ.Teams.CircuitOverlap.jaccard_topK_relabel
   kind: theorem
   declaration: AIQ.Teams.CircuitOverlap.jaccard_topK_relabel
-  source_path: theory/lean/CircuitOverlap.lean
+  source_path: theory/lean/CircuitOverlap/Basic.lean
   statement: 'Relabelling hidden units leaves the reference/item circuit overlap identical,
     for every pair of score vectors and every K. PROVED.
 
@@ -33,7 +33,7 @@ entries:
 - id: AIQ.Teams.CircuitOverlap.jaccard_not_invariant_of_one_sided_image
   kind: theorem
   declaration: AIQ.Teams.CircuitOverlap.jaccard_not_invariant_of_one_sided_image
-  source_path: theory/lean/CircuitOverlap.lean
+  source_path: theory/lean/CircuitOverlap/Basic.lean
   statement: 'The boundary of the result above: permuting only ONE side takes the overlap
     from 1 to 0. PROVED with an explicit witness.
 
@@ -44,7 +44,7 @@ entries:
 - id: AIQ.Teams.CircuitOverlap.topK_card_le
   kind: theorem
   declaration: AIQ.Teams.CircuitOverlap.topK_card_le
-  source_path: theory/lean/CircuitOverlap.lean
+  source_path: theory/lean/CircuitOverlap/Basic.lean
   statement: 'The selected circuit has at most K units, when the scores are injective on the
     unit set. PROVED. The injectivity hypothesis is the tie-breaking question the card leaves
     unspecified: with tied scores the selection returns more than K.
