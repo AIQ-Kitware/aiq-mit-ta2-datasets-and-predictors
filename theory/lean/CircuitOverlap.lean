@@ -36,6 +36,14 @@ a permutation of units: `topK (score ∘ σ) = σ⁻¹ '' topK score`. With that
 `jaccard_invariant_of_shared_permutation` becomes provable and the "sound within
 one model" claim is a theorem rather than an assertion -- which is the claim the
 deployed use actually rests on.
+
+## Prior art worth using
+
+The equivariance step needs only Mathlib: `Equiv.Perm` for the relabelling and
+`Finset.card_image_of_injective` to carry cardinalities through it. Both the
+intersection and the union are images of the same permutation, so the ratio is
+unchanged -- which is why this is bookkeeping rather than mathematics, and why
+it has not been done is a matter of effort rather than difficulty.
 -/
 import Mathlib.Data.Finset.Card
 import Mathlib.Data.Real.Basic
