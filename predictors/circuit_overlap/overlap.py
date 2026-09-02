@@ -15,9 +15,40 @@ from __future__ import annotations
 
 import numpy as np
 
+import magnet.theory as theory
+
+# ── Theory bindings ──────────────────────────────────────────────────────────
+#
+# theory/lean/Conjectures/Circuits.lean, via theory/indexes/conjectures.yaml.
+#
+# The question those statements pose is this file's question: is a circuit a
+# property of the FUNCTION the network computes, or of its PARAMETERIZATION?
+# Hidden units carry a permutation symmetry -- relabel them, permute the
+# adjacent weights, and the network computes exactly the same function -- and
+# every per-unit attribution moves with that relabelling.
+#
+# Within one model that is harmless, and saying so is worth as much as flagging
+# the cross-model case: the reference circuit is built from the same model's
+# own correct examples, so a relabelling moves both sides together. That is the
+# deployed use and it is sound.
+#
+# All three statements are `sorry`, so they are linked with `motivates`: this
+# code is evidence the statements are asked to explain, not a test of them.
+# Every predicate is a no-op at run time; MAGNET reads them with `ast`.
+# ─────────────────────────────────────────────────────────────────────────────
+
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
+@theory.satisfies(
+    'AIQ.Conjectures.Circuits.jaccard_invariant_of_shared_permutation::hS',
+    note='this IS the selector, and it is a top-k-by-absolute-value rule over '
+         'the flattened attribution: it reads scores and never unit names or '
+         'positions, so relabelling the units relabels the circuit and nothing '
+         'else. That is exactly `Equivariant` in the Lean, and it is what '
+         'makes the within-model comparison sound rather than merely '
+         'unexamined.',
+)
 def topk_indices_abs(vec: np.ndarray, k: int) -> np.ndarray:
     """Flat indices of the top-k entries by absolute value."""
     flat = np.abs(vec).ravel()
@@ -36,6 +67,17 @@ def cosine(a: np.ndarray, b: np.ndarray) -> float:
     return float(np.dot(a, b) / (na * nb))
 
 
+@theory.motivates(
+    'AIQ.Conjectures.Circuits.crossModel_jaccard_not_functional',
+    note='the quantity the conjecture is about. It is not a defect in the '
+         'current card -- it is a constraint on where the card can be taken. '
+         'BAA Phase 2 asks whether similar architectures yield similar natural '
+         'classes, which requires comparing circuits ACROSS models; if the '
+         'conjecture holds, this overlap is not a function of the functions '
+         'compared and the Phase-2 extension needs an alignment step designed '
+         'in from the start. A negative result delivered before Phase 2 is a '
+         'design input; found during it, it is a rewrite.',
+)
 def jaccard_sets(a: np.ndarray, b: np.ndarray) -> float:
     """Jaccard index between two sets of flat indices."""
     sa, sb = set(a.tolist()), set(b.tolist())
@@ -46,6 +88,15 @@ def jaccard_sets(a: np.ndarray, b: np.ndarray) -> float:
 
 # ── Reference circuit construction ───────────────────────────────────────────
 
+@theory.motivates(
+    'AIQ.Conjectures.Circuits.jaccard_invariant_of_shared_permutation',
+    note='the deployed case, and the sound one. The reference is a '
+         'correctness-weighted mean of attributions from the SAME model, so a '
+         'relabelling of that model\'s units permutes the reference and every '
+         'item vector together and the overlap is unchanged. Recorded as '
+         'grounded rather than left blank so the boundary is visible: it is '
+         'the cross-model extension that is in question, not this card.',
+)
 def build_reference(
     attr: np.ndarray,
     weights: np.ndarray | None = None,
@@ -72,6 +123,24 @@ def build_reference(
 
 # ── Per-item overlap scores ───────────────────────────────────────────────────
 
+@theory.motivates(
+    'AIQ.Conjectures.Circuits.alignedJaccard_is_functional',
+    note='the repair, at the cost of a matching problem over unit labellings. '
+         'Whether that matching is tractable at transformer width is a '
+         'follow-on empirical question and this function is where it would '
+         'land.',
+)
+@theory.ignores(
+    'AIQ.Conjectures.Circuits.alignedJaccard_is_functional::hab',
+    note='no alignment is searched here. The deployed quantity is the '
+         'UNALIGNED overlap, so the repair\'s hypothesis is not merely '
+         'unestablished -- it is deliberately outside the empirical model. '
+         'That is the right choice for the within-model card, where the shared '
+         'permutation makes alignment unnecessary, and the wrong one the '
+         'moment two independently trained models are compared. Recording it '
+         'as `ignores` rather than `assumes` says which of those two the card '
+         'is: a regime condition dropped on purpose, not a gap.',
+)
 def overlap_scores(
     item_attr: np.ndarray,       # [n_layers, intermediate_size]
     reference: np.ndarray,       # [n_layers, intermediate_size]
