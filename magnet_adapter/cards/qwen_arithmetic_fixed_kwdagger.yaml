@@ -90,6 +90,7 @@ links:
 # in the matrix can shrink that split with no effect on the reported number.
 theory:
   indexes:
+    - ../../theory/indexes/teams.yaml
     - ../../theory/indexes/conjectures.yaml
     - ../../theory/indexes/hygiene.yaml
 
@@ -98,6 +99,12 @@ theory:
     - ../run_predictor_card.py
 
   links:
+    - relation: approximates
+      ref: AIQ.Teams.CircuitOverlap.jaccard_le_one
+      note: >
+        The predictor ranks items by circuit overlap, which this bounds. What is
+        NOT established is that the overlap is a property of the function rather
+        than the parameterization -- that is open, in AIQ.Conjectures.Circuits.
     - relation: motivates
       ref: AIQ.Conjectures.Circuits.crossModel_jaccard_not_functional
       note: >
