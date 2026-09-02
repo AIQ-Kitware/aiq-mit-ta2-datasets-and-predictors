@@ -15,7 +15,7 @@ entries:
 - id: AIQ.Teams.CircuitOverlap.jaccard_le_one
   kind: theorem
   declaration: AIQ.Teams.CircuitOverlap.jaccard_le_one
-  source_path: theory/lean/Teams/CircuitOverlap.lean
+  source_path: theory/lean/CircuitOverlap.lean
   statement: 'Circuit overlap is bounded by one, for any two circuits including empty ones.
     PROVED. Together with jaccard_comm and jaccard_self this is the whole of what is established
     about the overlap; whether it is a property of the FUNCTION rather than the parameterization
@@ -25,7 +25,7 @@ entries:
 - id: AIQ.Teams.CircuitOverlap.jaccard_self
   kind: theorem
   declaration: AIQ.Teams.CircuitOverlap.jaccard_self
-  source_path: theory/lean/Teams/CircuitOverlap.lean
+  source_path: theory/lean/CircuitOverlap.lean
   statement: 'A nonempty circuit overlaps itself completely. PROVED.
 
     '

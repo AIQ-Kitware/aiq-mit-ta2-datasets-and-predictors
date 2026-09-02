@@ -15,6 +15,27 @@ one model the reference and the item circuit permute together and the overlap
 is unchanged -- which is the deployed use, and is sound. Across two
 independently trained models it is not, and that is stated as an open question
 in `AIQ.Conjectures.Circuits`, not resolved here.
+
+## What this does not formalize
+
+Almost everything the card does:
+
+* **No attribution, no top-K selection, no network.** `jaccard` is set overlap
+  between two arbitrary finite sets. Nothing here knows they are circuits.
+* **No AUC.** The card's actual claim is about ranking quality, and no notion of
+  ranking or of a threshold appears below.
+* **The equivariance that would justify within-model comparison is NOT proved
+  here.** That a per-unit attribution moves with a relabelling of hidden units,
+  and that the overlap is therefore unchanged when reference and item circuits
+  permute together, is stated as an open question in `AIQ.Conjectures.Circuits`.
+
+## Where a real formalization would go
+
+Define the top-K selection from a score vector, then prove it equivariant under
+a permutation of units: `topK (score ∘ σ) = σ⁻¹ '' topK score`. With that,
+`jaccard_invariant_of_shared_permutation` becomes provable and the "sound within
+one model" claim is a theorem rather than an assertion -- which is the claim the
+deployed use actually rests on.
 -/
 import Mathlib.Data.Finset.Card
 import Mathlib.Data.Real.Basic
@@ -47,9 +68,5 @@ theorem jaccard_le_one (A B : Finset α) : jaccard A B ≤ 1 := by
   · simp [Finset.union_eq_empty.mp h]
   · rw [div_le_one (by exact_mod_cast Finset.card_pos.mpr h)]
     exact_mod_cast Finset.card_le_card (Finset.inter_subset_union)
-
-/-- The card's assertion: the predictor's AUC clears a threshold. A definition
--- whether it holds is what the run measures. Above-chance means `θ > 1/2`. -/
-def AUCExceeds (auc θ : ℝ) : Prop := auc ≥ θ
 
 end AIQ.Teams.CircuitOverlap
