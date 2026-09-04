@@ -24,11 +24,12 @@ cd $REPO
 docker build -t mit-circuit-overlap-gpu .
 ```
 
-`MAGNET_REF` pins the aiq-magnet commit the evaluator uses. It is published on
-`AIQ-Kitware/aiq-magnet` before Friday 2026-09-05. Until then:
+`MAGNET_VERSION` in the Dockerfile is the aiq-magnet release the evaluator uses,
+from PyPI (0.1.0, which also brings aiq-magnet-theory). To build against
+another release:
 
 ```bash
-docker build --build-arg MAGNET_REF=main -t mit-circuit-overlap-gpu .
+docker build --build-arg MAGNET_VERSION=0.1.0 -t mit-circuit-overlap-gpu .
 ```
 
 `TORCH_CUDA` selects the torch build (default `cu130`, the CUDA 13 wheels).
@@ -40,7 +41,7 @@ On the host you need the same aiq-magnet, docker with the NVIDIA container
 toolkit, and tmux:
 
 ```bash
-pip install "aiq-magnet[optional] @ git+https://github.com/AIQ-Kitware/aiq-magnet@5c92d9fc180e1d5deb1c5ec7cd8dc3a64e328e13"
+pip install "aiq-magnet[optional]==0.1.0"
 export PYTHONPATH=$REPO
 ```
 

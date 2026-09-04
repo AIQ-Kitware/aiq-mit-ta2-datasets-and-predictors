@@ -11,16 +11,16 @@
 # Build, from the repository root:
 #   docker build -t mit-circuit-overlap-gpu .
 #
-# MAGNET_REF is the aiq-magnet commit the evaluator runs against. It is
-# on AIQ-Kitware/aiq-magnet main (the kwdagger execution merge, PR #94);
-# `--build-arg MAGNET_REF=main` builds against the tip of main instead.
+# MAGNET_VERSION is the aiq-magnet release the evaluator runs against, from
+# PyPI (0.1.0, released 2026-09-04; it also brings aiq-magnet-theory).
+# `--build-arg MAGNET_VERSION=<version>` builds against another release.
 #
 # Never baked: the HELM benchmark_output the predictor reads, and the
 # Qwen3-4B weights (HuggingFace cache). Both are mounted at run time. See
 # docs/containerized_evaluation.md.
 FROM python:3.11-slim
 
-ARG MAGNET_REF=5c92d9fc180e1d5deb1c5ec7cd8dc3a64e328e13
+ARG MAGNET_VERSION=0.1.0
 
 ENV PYTHONUNBUFFERED=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
@@ -70,7 +70,7 @@ RUN pip install --no-cache-dir -r /tmp/mit-requirements.txt \
 # that drives it. Pinned; kwdagger and cmd_queue arrive through magnet's own
 # dependency list.
 RUN pip install --no-cache-dir \
-        "aiq-magnet[optional] @ git+https://github.com/AIQ-Kitware/aiq-magnet@${MAGNET_REF}"
+        "aiq-magnet[optional]==${MAGNET_VERSION}"
 
 COPY . /opt/src/aiq-mit-ta2-datasets-and-predictors
 
