@@ -193,12 +193,12 @@ kwdagger:
     nodes:
       circuit_overlap:
         # Containerized execution is opt-in per node class, and a card that
-        # declares its DAG as data gets kwdagger's YamlProcessNode -- a sibling
-        # of MAGNET's ContainerProcessNode, not a descendant. Without this key
+        # declares its DAG as data gets kwdagger's plain YamlProcessNode unless
+        # it names MAGNET's MagnetProcessNode here. Without this key
         # `--container_image` is accepted, stored and never read: a green run
         # that containerized nothing. Inert until an image is named, so the
         # same card still runs on the host.
-        class: magnet.containers.ContainerYamlProcessNode
+        class: magnet.process_node.MagnetProcessNode
         # A wrapper, not the runner directly: a cmd_queue tmux worker inherits
         # NOTHING, so a bare `python` there is whatever the login shell exposes
         # -- missing torch, or a different interpreter that scores something

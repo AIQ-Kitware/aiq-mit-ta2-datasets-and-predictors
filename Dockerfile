@@ -12,15 +12,15 @@
 #   docker build -t mit-circuit-overlap-gpu .
 #
 # MAGNET_REF is the aiq-magnet commit the evaluator runs against. It is
-# published on AIQ-Kitware/aiq-magnet before 2026-09-05; until then
-# `--build-arg MAGNET_REF=main` builds against the public main branch.
+# on AIQ-Kitware/aiq-magnet main (the kwdagger execution merge, PR #94);
+# `--build-arg MAGNET_REF=main` builds against the tip of main instead.
 #
 # Never baked: the HELM benchmark_output the predictor reads, and the
 # Qwen3-4B weights (HuggingFace cache). Both are mounted at run time. See
 # docs/containerized_evaluation.md.
 FROM python:3.11-slim
 
-ARG MAGNET_REF=4b1f07d3cc92ac68aee3c1aad6e995651173adfc
+ARG MAGNET_REF=5c92d9fc180e1d5deb1c5ec7cd8dc3a64e328e13
 
 ENV PYTHONUNBUFFERED=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
